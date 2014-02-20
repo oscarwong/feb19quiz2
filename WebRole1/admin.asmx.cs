@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,8 +35,14 @@ namespace WebRole1
             queue.AddMessage(message);
         }
 
-        public static void ReadSumFromTableStorage()
+        public static string ReadSumFromTableStorage()
         {
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting("StorageConnectionString"));
+            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+            CloudTable table = tableClient.GetTableReference("people");
+            TableQuery<WorkerRole1.NumberEntity> query = new TableQuery<WorkerRole1.NumberEntity>().Where(TableQuery.GenerateFilterCondition("key", QueryComparisons.Equal, "0"));
+            return "sum";
 
         }
     }

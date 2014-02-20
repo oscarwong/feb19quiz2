@@ -29,16 +29,27 @@ namespace WorkerRole1
             CloudTable table = tableClient.GetTableReference("people");
             table.CreateIfNotExists();
 
+            int key = 0;
             while (true)
             {
                 CloudQueueMessage peekedMessage = queue.PeekMessage();
+                if (peekedMessage == null)
+                {
+                    continue;
+                }
                 string numbers = peekedMessage.AsString;
                 char[] delimiterChars = { ' ' };
                 string[] nums = numbers.Split(delimiterChars);
                 int sum = 0;
+                queue.DeleteMessage(peekedMessage);
                 foreach (string number in nums) {
                     sum += Convert.ToInt32(number);
                 }
+                key++;
+                NumberEntity entry = new NumberEntity(Convert.ToString(key), Convert.ToString(sum));
+                TableOperation insertOperation = TableOperation.Insert(entry);
+                table.Execute(insertOperation);
+
                 Thread.Sleep(10000);
                 Trace.TraceInformation("Working", "Information");
             }
